@@ -32,4 +32,10 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if not db_user or db_user.password_hash != hash_password(user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    return {"message": "Login successful", "user_id": db_user.id, "username": db_user.username}
+    return {
+        "message": "Login successful",
+        "user_id": db_user.id,
+        "username": db_user.username,
+        "start_weight": db_user.start_weight,
+        "goal_weight": db_user.goal_weight,
+    }
