@@ -181,6 +181,10 @@ async function handleCheckin() {
     drank_alcohol: state.drank,
   };
 
+  const btn = document.querySelector('#screen-app .btn-primary');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
   try {
     if (state.todayLog) {
       state.todayLog = await apiPut(`/logs/${state.userId}/${today}`, payload);
@@ -191,8 +195,18 @@ async function handleCheckin() {
     state.logs = await apiGet(`/logs/${state.userId}`);
     renderAll();
 
+    btn.textContent = '✓ Saved!';
+    btn.style.background = 'linear-gradient(135deg, #1a7a4a, #43AA8B)';
+    setTimeout(() => {
+      btn.textContent = 'Save Check-In';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2000);
+
     if (steps && steps >= 10000) showCelebration();
   } catch (err) {
+    btn.textContent = 'Save Check-In';
+    btn.disabled = false;
     alert('Failed to save: ' + err.message);
   }
 }
@@ -373,7 +387,8 @@ function closeCelebration() {
 
 // ---- UTILS ----
 function todayDate() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 // ---- INIT ----
