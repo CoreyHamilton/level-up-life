@@ -4,1142 +4,213 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Level Up Life</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --purple-deep: #0f0c29;
-    --purple-mid: #302b63;
-    --purple-dark: #24243e;
-    --pink: #F72585;
-    --blue: #4CC9F0;
-    --violet: #7209B7;
-    --indigo: #3A0CA3;
-    --gold: #FFD700;
-    --green: #43AA8B;
-    --card-bg: rgba(255,255,255,0.07);
-    --card-border: rgba(255,255,255,0.12);
-    --text: #ffffff;
-    --text-muted: rgba(255,255,255,0.5);
-    --text-dim: rgba(255,255,255,0.3);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: linear-gradient(135deg, var(--purple-deep), var(--purple-mid), var(--purple-dark));
-    min-height: 100vh;
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ---- SCREENS ---- */
-  .screen { display: none; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; }
-
-  /* ---- LOGIN ---- */
-  #screen-login {
-    justify-content: center;
-    align-items: center;
-    padding: 24px 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  #screen-login::before {
-    content: '';
-    position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(114,9,183,0.4) 0%, transparent 70%);
-    top: -200px; left: -200px;
-    pointer-events: none;
-  }
-  #screen-login::after {
-    content: '';
-    position: absolute;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(76,201,240,0.2) 0%, transparent 70%);
-    bottom: -150px; right: -150px;
-    pointer-events: none;
-  }
-  .login-box {
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 28px;
-    padding: 40px 36px;
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 0.5s ease;
-  }
-  .login-logo {
-    font-family: 'Fredoka One', cursive;
-    font-size: 36px;
-    text-align: center;
-    background: linear-gradient(135deg, var(--blue), var(--pink));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 6px;
-  }
-  .login-tagline {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 32px;
-  }
-  .login-tabs {
-    display: flex;
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 4px;
-    margin-bottom: 24px;
-    gap: 4px;
-  }
-  .login-tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text-muted);
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .login-tab.active {
-    background: linear-gradient(135deg, var(--violet), var(--indigo));
-    color: white;
-  }
-  .field-group { margin-bottom: 16px; }
-  .field-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 7px;
-  }
-  .field-input {
-    width: 100%;
-    padding: 13px 16px;
-    border-radius: 14px;
-    border: 2px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.06);
-    color: white;
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .field-input::placeholder { color: var(--text-dim); }
-  .field-input:focus { border-color: var(--blue); }
-  .btn-primary {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--pink), var(--violet));
-    color: white;
-    font-family: 'Fredoka One', cursive;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-top: 8px;
-    letter-spacing: 0.5px;
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(247,37,133,0.4); }
-  .btn-primary:active { transform: scale(0.98); }
-  .login-error {
-    background: rgba(247,37,133,0.15);
-    border: 1px solid rgba(247,37,133,0.3);
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--pink);
-    margin-bottom: 14px;
-    display: none;
-  }
-  .login-hint {
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 20px;
-    line-height: 1.6;
-  }
-
-  /* ---- DASHBOARD ---- */
-  #screen-dashboard { flex-direction: column; }
-  .topbar {
-    background: linear-gradient(135deg, var(--violet), var(--indigo));
-    padding: 20px 20px 16px;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  }
-  .topbar-logo {
-    font-family: 'Fredoka One', cursive;
-    font-size: 22px;
-    letter-spacing: 1px;
-  }
-  .topbar-date { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
-  .topbar-user {
-    position: absolute;
-    right: 16px;
-    top: 18px;
-    font-size: 12px;
-    color: var(--text-muted);
-    cursor: pointer;
-    text-decoration: underline;
-    font-weight: 700;
-  }
-  .tabs {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  .tab-btn {
-    background: transparent;
-    border: 2px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.6);
-    padding: 7px 18px;
-    border-radius: 40px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    transition: all 0.2s;
-  }
-  .tab-btn.active {
-    background: var(--pink);
-    border-color: var(--pink);
-    color: white;
-  }
-
-  .dash-content {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px 16px 80px;
-  }
-
-  .inner { max-width: 560px; margin: 0 auto; }
-
-  /* ---- CARDS ---- */
-  .card {
-    background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 14px;
-    animation: fadeUp 0.4s ease;
-  }
-  .card-title {
-    font-weight: 900;
-    font-size: 15px;
-    margin-bottom: 12px;
-    color: var(--text);
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ---- AVATAR CARD ---- */
-  .avatar-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .avatar-wrap { flex: 0 0 auto; text-align: center; }
-  .avatar-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 700; }
-  .avatar-info { flex: 1; }
-  .avatar-headline { font-weight: 900; font-size: 15px; margin-bottom: 6px; }
-  .progress-bar {
-    height: 14px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 6px;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 20px;
-    background: linear-gradient(90deg, var(--blue), var(--pink));
-    transition: width 0.7s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .progress-text { color: var(--text-muted); font-size: 12px; }
-  .streak-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: linear-gradient(135deg, #FF6B35, var(--gold));
-    border-radius: 12px;
-    padding: 5px 12px;
-    font-weight: 900;
-    font-size: 16px;
-    margin-top: 10px;
-  }
-
-  /* ---- QUOTE ---- */
-  .quote-card { text-align: center; }
-  .quote-text {
-    color: var(--blue);
-    font-size: 14px;
-    font-style: italic;
-    font-weight: 600;
-    line-height: 1.6;
-  }
-  .quote-author { color: var(--text-dim); font-size: 12px; margin-top: 6px; }
-
-  /* ---- REALISTIC MODE ---- */
-  .realistic-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .realistic-label { font-weight: 800; font-size: 15px; }
-  .realistic-sub { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
-  .toggle {
-    width: 50px; height: 28px;
-    border-radius: 14px;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    transition: background 0.25s;
-    flex-shrink: 0;
-  }
-  .toggle-knob {
-    position: absolute;
-    top: 4px;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: white;
-    transition: left 0.25s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  }
-
-  /* ---- CHECK-IN FORM ---- */
-  .form-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 7px;
-  }
-  .form-input {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 13px;
-    border: 2px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.07);
-    color: white;
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 14px;
-    -webkit-appearance: none;
-  }
-  .form-input::placeholder { color: var(--text-dim); }
-  .form-input:focus { border-color: var(--blue); }
-  .btn-group {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .choice-btn {
-    flex: 1;
-    padding: 11px 6px;
-    border-radius: 13px;
-    border: 2px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.05);
-    color: white;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: 'Nunito', sans-serif;
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .choice-btn.selected {
-    border-color: var(--pink);
-    background: rgba(247,37,133,0.18);
-  }
-  .hint-text { color: var(--blue); font-size: 12px; margin-top: -10px; margin-bottom: 12px; }
-  .alcohol-hint { color: var(--text-muted); font-size: 12px; margin-top: -10px; margin-bottom: 14px; }
-  .submit-btn {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--pink), var(--violet));
-    color: white;
-    font-family: 'Fredoka One', cursive;
-    font-size: 19px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.5px;
-  }
-  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(247,37,133,0.4); }
-  .submit-btn:active { transform: scale(0.98); }
-
-  /* Logged state */
-  .logged-card { text-align: center; }
-  .logged-icon { font-size: 52px; margin-bottom: 6px; }
-  .logged-title { font-weight: 900; font-size: 18px; }
-  .logged-sub { color: var(--text-muted); font-size: 13px; margin-top: 6px; }
-  .edit-btn {
-    margin-top: 12px;
-    padding: 9px 20px;
-    border-radius: 12px;
-    border: none;
-    background: rgba(255,255,255,0.08);
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Nunito', sans-serif;
-  }
-
-  /* ---- HABITS ---- */
-  .habits-row {
-    display: flex;
-    gap: 10px;
-  }
-  .habit-chip {
-    flex: 1;
-    text-align: center;
-    border-radius: 14px;
-    padding: 12px 6px;
-    border: 2px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.04);
-    transition: all 0.3s;
-  }
-  .habit-chip.done {
-    border-color: var(--blue);
-    background: rgba(76,201,240,0.12);
-  }
-  .habit-chip-icon { font-size: 22px; }
-  .habit-chip-label { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-top: 4px; }
-  .habit-chip.done .habit-chip-label { color: var(--blue); }
-  .habit-chip-status { font-size: 14px; margin-top: 3px; }
-
-  /* ---- WEEK BARS ---- */
-  .week-bars {
-    display: flex;
-    gap: 6px;
-    align-items: flex-end;
-    height: 90px;
-  }
-  .week-bar-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    height: 100%;
-    justify-content: flex-end;
-  }
-  .week-bar-val { font-size: 9px; color: var(--text-muted); font-weight: 700; text-align: center; min-height: 12px; }
-  .week-bar-track {
-    width: 100%;
-    flex: 1;
-    background: rgba(255,255,255,0.06);
-    border-radius: 8px;
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
-  }
-  .week-bar-fill {
-    width: 100%;
-    border-radius: 8px;
-    transition: height 0.5s ease;
-  }
-  .week-bar-day { font-size: 10px; color: var(--text-muted); font-weight: 700; }
-  .week-bar-day.today-label { color: var(--pink); font-weight: 900; }
-
-  /* Alcohol week */
-  .alc-track { height: 14px; background: rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; }
-  .alc-fill { height: 100%; border-radius: 20px; transition: width 0.5s ease; }
-  .alc-info { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
-
-  /* ---- CELEBRATION ---- */
-  #celebration {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-  }
-  #celebration.show { display: flex; }
-  .celebrate-box {
-    background: linear-gradient(135deg, var(--pink), var(--violet));
-    border-radius: 28px;
-    padding: 36px 40px;
-    text-align: center;
-    font-family: 'Fredoka One', cursive;
-    font-size: 30px;
-    color: white;
-    box-shadow: 0 24px 60px rgba(247,37,133,0.5);
-    animation: pop 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    max-width: 300px;
-  }
-  .celebrate-sub { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700; margin-top: 8px; opacity: 0.85; }
-  @keyframes pop {
-    from { transform: scale(0.4); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-  }
-
-  /* ---- SETUP ---- */
-  .setup-hint {
-    background: rgba(76,201,240,0.1);
-    border: 1px solid rgba(76,201,240,0.25);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-  }
-  .setup-hint-title { color: var(--blue); font-weight: 800; font-size: 13px; margin-bottom: 6px; }
-  .setup-hint-body { color: var(--text-muted); font-size: 13px; line-height: 1.8; }
-
-  /* ---- RESPONSIVE ---- */
-  @media (min-width: 600px) {
-    .topbar { padding: 24px 32px 18px; }
-    .topbar-logo { font-size: 26px; }
-    .dash-content { padding: 24px 24px 80px; }
-    .card { padding: 22px 24px; }
-    .login-box { padding: 48px 48px; }
-    .celebrate-box { font-size: 34px; }
-  }
-  @media (min-width: 900px) {
-    .dash-content { padding: 32px 32px 80px; }
-    .inner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-    .inner .card.full-width { grid-column: 1 / -1; }
-    .week-bars { height: 110px; }
-  }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<!-- ============ LOGIN SCREEN ============ -->
+<!-- LOGIN SCREEN -->
 <div id="screen-login" class="screen active">
   <div class="login-box">
-    <div class="login-logo">💪 Level Up Life</div>
-    <div class="login-tagline">Your daily health dashboard</div>
-
-    <div class="login-tabs">
-      <button class="login-tab active" onclick="switchAuthTab('login')">Sign In</button>
-      <button class="login-tab" onclick="switchAuthTab('register')">Create Account</button>
-    </div>
-
-    <div id="login-error" class="login-error"></div>
-
-    <!-- Login form -->
-    <div id="form-login">
-      <div class="field-group">
-        <label class="field-label">Username</label>
-        <input class="field-input" id="login-user" type="text" placeholder="your username" autocomplete="username">
+    <div class="login-logo">LEVEL UP LIFE</div>
+    <div class="login-tagline">your daily dashboard</div>
+    <div class="login-card">
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
       </div>
-      <div class="field-group">
-        <label class="field-label">Password</label>
-        <input class="field-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+
+      <!-- Login Form -->
+      <div id="form-login">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="login-username" type="text" placeholder="your username" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" onclick="handleLogin()">Sign In</button>
       </div>
-      <button class="btn-primary" onclick="doLogin()">Let's Go 🚀</button>
-    </div>
 
-    <!-- Register form -->
-    <div id="form-register" style="display:none">
-      <div class="field-group">
-        <label class="field-label">Choose a username</label>
-        <input class="field-input" id="reg-user" type="text" placeholder="e.g. coach_mike" autocomplete="username">
+      <!-- Register Form -->
+      <div id="form-register" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="reg-username" type="text" placeholder="choose a username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="reg-password" type="password" placeholder="••••••••">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Start Weight (lbs)</label>
+            <input class="form-input" id="reg-start-weight" type="number" placeholder="e.g. 210">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Goal Weight (lbs)</label>
+            <input class="form-input" id="reg-goal-weight" type="number" placeholder="e.g. 180">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="handleRegister()">Create Account</button>
       </div>
-      <div class="field-group">
-        <label class="field-label">Choose a password</label>
-        <input class="field-input" id="reg-pass" type="password" placeholder="8+ characters" autocomplete="new-password">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Confirm password</label>
-        <input class="field-input" id="reg-pass2" type="password" placeholder="same again" autocomplete="new-password">
-      </div>
-      <button class="btn-primary" onclick="doRegister()">Create Account ✨</button>
-    </div>
 
-    <div class="login-hint">
-      🔒 All data is stored locally on your device.<br>
-      No servers. No tracking. Just you.
-    </div>
-  </div>
-</div>
-
-<!-- ============ DASHBOARD SCREEN ============ -->
-<div id="screen-dashboard" class="screen">
-
-  <div class="topbar">
-    <div style="position:relative">
-      <div class="topbar-logo">💪 Level Up Life</div>
-      <div class="topbar-date" id="topbar-date"></div>
-      <div class="topbar-user" id="topbar-user" onclick="doLogout()"></div>
-    </div>
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('today')">📋 Today</button>
-      <button class="tab-btn" onclick="switchTab('week')">📊 Week</button>
-      <button class="tab-btn" onclick="switchTab('setup')">⚙️ Setup</button>
-    </div>
-  </div>
-
-  <div class="dash-content">
-    <div class="inner" id="dash-inner">
-      <!-- filled by JS -->
+      <div class="login-error" id="login-error"></div>
     </div>
   </div>
 </div>
 
-<!-- Celebration overlay -->
-<div id="celebration">
-  <div class="celebrate-box">
-    🎉 10,000 Steps!
-    <div class="celebrate-sub">You're absolutely crushing it!</div>
+<!-- MAIN APP SCREEN -->
+<div id="screen-app" class="screen">
+  <div class="app-header">
+    <div class="header-logo">LEVEL UP LIFE</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="header-user" id="header-username"></div>
+      <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+    </div>
   </div>
-</div>
 
-<script>
-// ============================================================
-//  DATA LAYER — localStorage, per-user namespaced
-// ============================================================
-const USERS_KEY = 'lul_users';
-const SESSION_KEY = 'lul_session';
+  <div class="app-content">
 
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch { return {}; }
-}
-function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
-function currentUser() { return localStorage.getItem(SESSION_KEY) || null; }
-function userDataKey(u) { return 'lul_data_' + u; }
+    <!-- Realistic Mode Banner -->
+    <div class="realistic-banner" id="realistic-banner" style="display:none">
+      <span>🌤</span>
+      <span>Realistic Mode — small wins count today</span>
+    </div>
 
-function loadUserData(u) {
-  try {
-    const d = JSON.parse(localStorage.getItem(userDataKey(u)) || '{}');
-    if (!d.days) d.days = {};
-    if (!d.weeklyAlcohol) d.weeklyAlcohol = {};
-    if (!d.startWeight) d.startWeight = '';
-    if (!d.goalWeight) d.goalWeight = '';
-    if (!d.currentWeight) d.currentWeight = '';
-    if (d.quoteIndex === undefined) d.quoteIndex = Math.floor(Math.random() * quotes.length);
-    return d;
-  } catch { return { days:{}, weeklyAlcohol:{}, startWeight:'', goalWeight:'', currentWeight:'', quoteIndex:0 }; }
-}
-function saveUserData(u, d) { localStorage.setItem(userDataKey(u), JSON.stringify(d)); }
-
-// ============================================================
-//  AUTH
-// ============================================================
-function switchAuthTab(tab) {
-  document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
-  document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
-  document.querySelectorAll('.login-tab').forEach((b,i) => b.classList.toggle('active', (i===0) === (tab==='login')));
-  showError('');
-}
-function showError(msg) {
-  const el = document.getElementById('login-error');
-  el.style.display = msg ? 'block' : 'none';
-  el.textContent = msg;
-}
-function doLogin() {
-  const u = document.getElementById('login-user').value.trim().toLowerCase();
-  const p = document.getElementById('login-pass').value;
-  if (!u || !p) return showError('Please enter your username and password.');
-  const users = getUsers();
-  if (!users[u] || users[u].hash !== simpleHash(p)) return showError('Invalid username or password.');
-  localStorage.setItem(SESSION_KEY, u);
-  enterDashboard();
-}
-function doRegister() {
-  const u = document.getElementById('reg-user').value.trim().toLowerCase();
-  const p = document.getElementById('reg-pass').value;
-  const p2 = document.getElementById('reg-pass2').value;
-  if (!u || u.length < 2) return showError('Username must be at least 2 characters.');
-  if (!/^[a-z0-9_]+$/.test(u)) return showError('Username: letters, numbers, and _ only.');
-  if (p.length < 6) return showError('Password must be at least 6 characters.');
-  if (p !== p2) return showError('Passwords do not match.');
-  const users = getUsers();
-  if (users[u]) return showError('That username is already taken.');
-  users[u] = { hash: simpleHash(p), created: Date.now() };
-  saveUsers(users);
-  localStorage.setItem(SESSION_KEY, u);
-  enterDashboard();
-}
-function doLogout() {
-  if (!confirm('Sign out?')) return;
-  localStorage.removeItem(SESSION_KEY);
-  location.reload();
-}
-function simpleHash(s) {
-  // Simple non-cryptographic hash — fine for local-only storage
-  let h = 0;
-  for (let i = 0; i < s.length; i++) { h = Math.imul(31, h) + s.charCodeAt(i) | 0; }
-  return h.toString(36);
-}
-
-// ============================================================
-//  QUOTES
-// ============================================================
-const quotes = [
-  { text: "A year from now, you'll wish you started today.", author: "Karen Lamb" },
-  { text: "Take care of your body. It's the only place you have to live.", author: "Jim Rohn" },
-  { text: "Small steps every day lead to big changes every year.", author: "" },
-  { text: "You don't have to be extreme — just consistent.", author: "" },
-  { text: "The groundwork of all happiness is health.", author: "Leigh Hunt" },
-  { text: "Progress, not perfection.", author: "" },
-  { text: "Every step counts. Literally.", author: "" },
-  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-  { text: "Discipline is just choosing between what you want now and what you want most.", author: "" },
-  { text: "Your future self is cheering you on.", author: "" },
-];
-
-// ============================================================
-//  AVATAR SVG
-// ============================================================
-function avatarSVG(stage) {
-  const stages = [
-    { bodyC:'#E76F51', belly:true,  posture:'slouch', armW:11, label:'Day 1 You' },
-    { bodyC:'#F4A261', belly:true,  posture:'neutral', armW:10, label:'Getting Started' },
-    { bodyC:'#43AA8B', belly:false, posture:'neutral', armW:8,  label:'Building Habits' },
-    { bodyC:'#4CC9F0', belly:false, posture:'tall',    armW:8,  label:'Strong & Steady' },
-    { bodyC:'#7209B7', belly:false, posture:'tall',    armW:8,  label:'Confident You' },
-  ];
-  const c = stages[Math.min(stage, 4)];
-  const skinC = '#F5CBA7';
-  const slouch = c.posture === 'slouch';
-  const tall = c.posture === 'tall';
-  const headY = slouch ? 30 : tall ? 23 : 27;
-  const smileD = tall ? 'M44 34 Q50 40 56 34' : slouch ? 'M44 37 Q50 35 56 37' : 'M44 36 Q50 41 56 36';
-  const bodyY = c.belly ? (slouch ? 68 : 66) : (tall ? 50 : 53);
-  const bodyRX = c.belly ? (slouch ? 21 : 19) : 0;
-  const bodyRY = c.belly ? 26 : 0;
-  const rectW = tall ? 32 : 28;
-  const armY1 = slouch ? 63 : tall ? 58 : 61;
-  const armX2L = slouch ? 12 : tall ? 10 : 12;
-  const armX2R = slouch ? 88 : tall ? 90 : 88;
-  const legTop = c.belly ? 92 : 84;
-
-  return `<svg viewBox="0 0 100 140" width="90" height="126">
-    <ellipse cx="50" cy="${headY}" rx="15" ry="16" fill="${skinC}"/>
-    <ellipse cx="50" cy="${headY-16}" rx="15" ry="7" fill="#3D2B1F"/>
-    <circle cx="44" cy="${headY-2}" r="2.2" fill="white"/>
-    <circle cx="56" cy="${headY-2}" r="2.2" fill="white"/>
-    <circle cx="44.8" cy="${headY-1.2}" r="1.1" fill="#222"/>
-    <circle cx="56.8" cy="${headY-1.2}" r="1.1" fill="#222"/>
-    <path d="${smileD}" stroke="#3D2B1F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    ${c.belly
-      ? `<ellipse cx="50" cy="${bodyY}" rx="${bodyRX}" ry="${bodyRY}" fill="${c.bodyC}"/>`
-      : `<rect x="${(100-rectW)/2}" y="${bodyY}" width="${rectW}" height="${tall?38:34}" rx="10" fill="${c.bodyC}"/>`}
-    <line x1="${slouch?28:tall?30:30}" y1="${armY1}" x2="${armX2L}" y2="${armY1+18}" stroke="${c.bodyC}" stroke-width="${c.armW}" stroke-linecap="round"/>
-    <line x1="${slouch?72:tall?70:70}" y1="${armY1}" x2="${armX2R}" y2="${armY1+18}" stroke="${c.bodyC}" stroke-width="${c.armW}" stroke-linecap="round"/>
-    <line x1="42" y1="${legTop}" x2="36" y2="133" stroke="${c.bodyC}" stroke-width="9" stroke-linecap="round"/>
-    <line x1="58" y1="${legTop}" x2="64" y2="133" stroke="${c.bodyC}" stroke-width="9" stroke-linecap="round"/>
-    ${tall ? '<path d="M74 18 L78 25 L86 26 L80 32 L82 40 L74 36 L66 40 L68 32 L62 26 L70 25 Z" fill="#FFD700" opacity="0.9"/>' : ''}
-  </svg>`;
-}
-
-// ============================================================
-//  DATE UTILS
-// ============================================================
-function todayKey() {
-  return new Date().toISOString().split('T')[0];
-}
-function weekKey() {
-  const d = new Date();
-  const jan1 = new Date(d.getFullYear(), 0, 1);
-  const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
-  return `${d.getFullYear()}-W${week}`;
-}
-function last7Days() {
-  const result = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    result.push({
-      key: d.toISOString().split('T')[0],
-      label: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      isToday: i === 0,
-    });
-  }
-  return result;
-}
-
-// ============================================================
-//  DASHBOARD STATE
-// ============================================================
-let _user = null;
-let _data = null;
-let _currentTab = 'today';
-let _realisticMode = false;
-let _tempSteps = '';
-let _tempWeight = '';
-let _tempDrink = null;
-let _tempAte = '';
-
-function enterDashboard() {
-  _user = currentUser();
-  _data = loadUserData(_user);
-
-  document.getElementById('screen-login').classList.remove('active');
-  document.getElementById('screen-dashboard').classList.add('active');
-
-  const now = new Date();
-  document.getElementById('topbar-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-  document.getElementById('topbar-user').textContent = `👋 ${_user} · sign out`;
-
-  if (!_data.startWeight) _currentTab = 'setup';
-  renderDash();
-}
-
-function save() { saveUserData(_user, _data); }
-
-function switchTab(tab) {
-  _currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', ['today','week','setup'][i] === tab);
-  });
-  renderDash();
-}
-
-// ============================================================
-//  COMPUTED VALUES
-// ============================================================
-function calcStreak() {
-  let streak = 0;
-  const d = new Date();
-  for (let i = 1; i <= 365; i++) {
-    d.setDate(d.getDate() - 1);
-    const k = d.toISOString().split('T')[0];
-    const e = _data.days[k];
-    if (e && e.steps >= 10000) streak++;
-    else break;
-  }
-  return streak;
-}
-function calcProgress() {
-  const sw = parseFloat(_data.startWeight) || 0;
-  const gw = parseFloat(_data.goalWeight) || 0;
-  const cw = parseFloat(_data.currentWeight) || sw;
-  const goalLbs = sw && gw ? Math.max(1, sw - gw) : 40;
-  const lostLbs = sw ? Math.max(0, sw - cw) : 0;
-  const pct = Math.min(100, Math.round((lostLbs / goalLbs) * 100));
-  const avatarStage = lostLbs === 0 ? 0
-    : lostLbs < goalLbs * 0.15 ? 1
-    : lostLbs < goalLbs * 0.40 ? 2
-    : lostLbs < goalLbs * 0.75 ? 3 : 4;
-  return { lostLbs, goalLbs, pct, avatarStage };
-}
-function avatarStageName(s) {
-  return ['Day 1 You','Getting Started','Building Habits','Strong & Steady','Confident You'][s];
-}
-
-// ============================================================
-//  RENDER
-// ============================================================
-function renderDash() {
-  const el = document.getElementById('dash-inner');
-  if (_currentTab === 'today') el.innerHTML = renderToday();
-  else if (_currentTab === 'week') el.innerHTML = renderWeek();
-  else el.innerHTML = renderSetup();
-}
-
-function renderToday() {
-  const tk = todayKey();
-  const entry = _data.days[tk] || {};
-  const streak = calcStreak();
-  const { lostLbs, goalLbs, pct, avatarStage } = calcProgress();
-  const wk = weekKey();
-  const drinkDays = _data.weeklyAlcohol[wk] || 0;
-  const q = quotes[_data.quoteIndex % quotes.length];
-
-  const avatarHtml = `
-    <div class="card avatar-card full-width">
-      <div class="avatar-wrap">
-        ${avatarSVG(avatarStage)}
-        <div class="avatar-label">${avatarStageName(avatarStage)}</div>
-      </div>
-      <div class="avatar-info">
-        <div class="avatar-headline">${lostLbs > 0 ? lostLbs.toFixed(1)+' lbs lost! 🔥' : 'Your journey starts here!'}</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        <div class="progress-text">${pct}% to goal &bull; ${Math.max(0,goalLbs-lostLbs).toFixed(1)} lbs to go</div>
-        <div class="streak-badge">🔥 ${streak} day streak</div>
-      </div>
-    </div>`;
-
-  const quoteHtml = `
-    <div class="card quote-card">
-      <div class="quote-text">"${q.text}"</div>
-      ${q.author ? `<div class="quote-author">— ${q.author}</div>` : ''}
-    </div>`;
-
-  const realisticHtml = `
+    <!-- Avatar + Progress -->
     <div class="card">
-      <div class="realistic-row">
+      <div class="card-title">YOUR PROGRESS</div>
+      <div class="avatar-section">
         <div>
-          <div class="realistic-label">🧘 Realistic Mode</div>
-          <div class="realistic-sub">Crazy day? Celebrate small wins.</div>
+          <svg id="avatar-svg" viewBox="0 0 100 140" width="80" height="112"></svg>
+          <div class="avatar-label" id="avatar-label">Day 1</div>
         </div>
-        <button class="toggle" id="realistic-toggle" onclick="toggleRealistic()"
-          style="background:${_realisticMode ? 'var(--blue)' : 'rgba(255,255,255,0.12)'}">
-          <div class="toggle-knob" style="left:${_realisticMode ? 26 : 4}px"></div>
-        </button>
-      </div>
-    </div>`;
-
-  let mainHtml;
-  if (entry.logged) {
-    mainHtml = `
-      <div class="card logged-card full-width">
-        <div class="logged-icon">✅</div>
-        <div class="logged-title">Today's logged!</div>
-        <div class="logged-sub">
-          ${(entry.steps||0).toLocaleString()} steps &bull;
-          ${entry.steps >= 10000 ? 'Goal crushed! 🔥' : _realisticMode ? 'Realistic day — still counts! 💙' : ((10000-(entry.steps||0)).toLocaleString()+' short of goal')}
-        </div>
-        <button class="edit-btn" onclick="unlockEntry()">Edit entry</button>
-      </div>`;
-  } else {
-    mainHtml = `
-      <div class="card full-width">
-        <div class="card-title">📋 Today's Check-In</div>
-
-        <label class="form-label">👟 Steps today</label>
-        <input class="form-input" id="inp-steps" type="number" inputmode="numeric" placeholder="e.g. 8,432"
-          value="${_tempSteps}" onchange="_tempSteps=this.value">
-        ${_realisticMode ? '<div class="hint-text">Any steps count today. Even 1,000 is a win! 👏</div>' : ''}
-
-        <label class="form-label">⚖️ Weight — optional</label>
-        <input class="form-input" id="inp-weight" type="number" inputmode="decimal" placeholder="lbs — skip if not today"
-          value="${_tempWeight}" onchange="_tempWeight=this.value">
-
-        <label class="form-label">🍽️ How was your eating?</label>
-        <div class="btn-group">
-          ${['Great 💪','Decent 👍','Rough day 😅'].map(opt =>
-            `<button class="choice-btn${_tempAte===opt?' selected':''}" onclick="selectAte('${opt}')">${opt}</button>`
-          ).join('')}
-        </div>
-
-        <label class="form-label">🍺 Did you drink today?</label>
-        <div class="btn-group">
-          <button class="choice-btn${_tempDrink===false?' selected':''}" onclick="selectDrink(false)">Nope 🙌</button>
-          <button class="choice-btn${_tempDrink===true?' selected':''}" onclick="selectDrink(true)">Yes</button>
-        </div>
-        <div class="alcohol-hint">This week: ${drinkDays}/2 drink days ${drinkDays<=2?'✅':'⚠️'}</div>
-
-        <button class="submit-btn" onclick="logToday()">Log Today 🚀</button>
-      </div>`;
-  }
-
-  const habitsHtml = `
-    <div class="card full-width">
-      <div class="card-title">🏅 Habit Status</div>
-      <div class="habits-row">
-        <div class="habit-chip ${entry.steps>=10000?'done':''}">
-          <div class="habit-chip-icon">👟</div>
-          <div class="habit-chip-label">Steps</div>
-          <div class="habit-chip-status">${entry.steps>=10000?'✓':'–'}</div>
-        </div>
-        <div class="habit-chip ${drinkDays<=2?'done':''}">
-          <div class="habit-chip-icon">🍺</div>
-          <div class="habit-chip-label">Alcohol</div>
-          <div class="habit-chip-status">${drinkDays<=2?'✓':'⚠'}</div>
-        </div>
-        <div class="habit-chip ${entry.weight?'done':''}">
-          <div class="habit-chip-icon">⚖️</div>
-          <div class="habit-chip-label">Weigh-in</div>
-          <div class="habit-chip-status">${entry.weight?'✓':'–'}</div>
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>Weight Goal</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+          </div>
+          <div class="progress-stats">
+            <div class="stat-box">
+              <div class="stat-value" id="stat-start">--</div>
+              <div class="stat-label">Start</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-current">--</div>
+              <div class="stat-label">Current</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-goal">--</div>
+              <div class="stat-label">Goal</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>`;
-
-  return avatarHtml + quoteHtml + realisticHtml + mainHtml + habitsHtml;
-}
-
-function renderWeek() {
-  const days = last7Days();
-  const tk = todayKey();
-  const { lostLbs, goalLbs, avatarStage } = calcProgress();
-  const wk = weekKey();
-  const drinkDays = _data.weeklyAlcohol[wk] || 0;
-
-  // Steps chart
-  const stepBars = days.map(d => {
-    const e = _data.days[d.key] || {};
-    const steps = e.steps || 0;
-    const pct = Math.min(100, (steps / 10000) * 100);
-    const crush = steps >= 10000;
-    const val = steps > 0 ? (crush ? '🔥' : steps >= 1000 ? (steps/1000).toFixed(1)+'k' : steps) : '–';
-    return `<div class="week-bar-col">
-      <div class="week-bar-val">${val}</div>
-      <div class="week-bar-track">
-        <div class="week-bar-fill" style="height:${pct}%;background:${crush?'linear-gradient(#FFD700,#F72585)':'linear-gradient(#4CC9F0,#3A0CA3)'}"></div>
-      </div>
-      <div class="week-bar-day ${d.isToday?'today-label':''}">${d.label}</div>
-    </div>`;
-  }).join('');
-
-  // Weight entries this week
-  const weightEntries = days.filter(d => _data.days[d.key]?.weight).map(d => ({
-    label: d.label, w: parseFloat(_data.days[d.key].weight),
-  }));
-  let weightHtml = '<div style="color:var(--text-muted);font-size:13px">No weigh-ins this week yet.</div>';
-  if (weightEntries.length > 0) {
-    const min = Math.min(...weightEntries.map(e=>e.w));
-    const max = Math.max(...weightEntries.map(e=>e.w));
-    const range = max - min || 1;
-    weightHtml = `<div style="display:flex;gap:8px;align-items:flex-end;height:60px">
-      ${weightEntries.map(e => `<div style="flex:1;text-align:center">
-        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">${e.w}</div>
-        <div style="height:${20+((max-e.w)/range*40)}px;background:linear-gradient(var(--blue),var(--violet));border-radius:6px;transition:height 0.5s"></div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${e.label}</div>
-      </div>`).join('')}
-    </div>`;
-  }
-
-  // Stages
-  const toNext = avatarStage < 4
-    ? (goalLbs * [0.15,0.4,0.75,1][Math.min(avatarStage,3)] - lostLbs).toFixed(1) + ' lbs to next level'
-    : '🏆 Final form unlocked!';
-
-  return `
-    <div class="card full-width">
-      <div class="card-title">📆 This Week's Steps</div>
-      <div class="week-bars">${stepBars}</div>
     </div>
+
+    <!-- Quote -->
     <div class="card">
-      <div class="card-title">🍺 Alcohol This Week</div>
-      <div class="alc-track">
-        <div class="alc-fill" style="width:${Math.min(100,(drinkDays/2)*100)}%;background:${drinkDays<=2?'linear-gradient(90deg,var(--blue),var(--green))':'linear-gradient(90deg,var(--pink),#FF6B35)'}"></div>
-      </div>
-      <div class="alc-info">
-        <span style="color:var(--text-muted);font-size:13px">${drinkDays} of 2 allowed drink days ${drinkDays<=2?'✅':'⚠️ Over limit'}</span>
-        <span style="font-size:28px">${drinkDays===0?'🌟':drinkDays<=2?'👍':'😬'}</span>
-      </div>
+      <div class="quote-text" id="quote-text"></div>
+      <div class="quote-author" id="quote-author"></div>
     </div>
+
+    <!-- Daily Check-In -->
     <div class="card">
-      <div class="card-title">📈 Weight Trend</div>
-      ${weightHtml}
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:16px">
-      ${avatarSVG(avatarStage)}
-      <div>
-        <div style="font-weight:900;font-size:15px">Avatar Progress</div>
-        <div style="color:var(--blue);font-size:13px;margin-top:4px">Stage ${avatarStage+1} of 5</div>
-        <div style="color:var(--text-muted);font-size:12px;margin-top:4px">${toNext}</div>
-      </div>
-    </div>`;
-}
-
-function renderSetup() {
-  return `
-    <div class="card full-width">
-      <div class="card-title">⚙️ Your Goals</div>
-
-      <label class="form-label">Starting weight (lbs)</label>
-      <input class="form-input" type="number" inputmode="decimal" placeholder="e.g. 220"
-        value="${_data.startWeight}" onchange="updateSetup('startWeight',this.value)">
-
-      <label class="form-label">Goal weight (lbs)</label>
-      <input class="form-input" type="number" inputmode="decimal" placeholder="e.g. 180"
-        value="${_data.goalWeight}" onchange="updateSetup('goalWeight',this.value)">
-
-      <label class="form-label">Current weight (lbs)</label>
-      <input class="form-input" type="number" inputmode="decimal" placeholder="Same as starting if just beginning"
-        value="${_data.currentWeight}" onchange="updateSetup('currentWeight',this.value)">
-
-      <div class="setup-hint">
-        <div class="setup-hint-title">Your Daily Targets</div>
-        <div class="setup-hint-body">
-          👟 10,000 steps / day<br>
-          🍺 Max 2 drink days / week<br>
-          ⚖️ Optional daily weigh-in
+      <div class="card-title">TODAY'S CHECK-IN</div>
+      <div class="checkin-grid">
+        <div class="checkin-item">
+          <div class="checkin-label">Steps</div>
+          <input class="checkin-input" id="input-steps" type="number" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="checkin-item">
+          <div class="checkin-label">Weight (lbs)</div>
+          <input class="checkin-input" id="input-weight" type="number" inputmode="decimal" step="0.1" placeholder="optional">
         </div>
       </div>
 
-      <button class="submit-btn" onclick="switchTab('today')">Save & Go 🚀</button>
-    </div>`;
-}
+      <div class="toggle-row" id="toggle-ate-well" onclick="toggleItem('ate-well')">
+        <div>
+          <div class="toggle-label">Ate Well Today</div>
+          <div class="toggle-sub">Mostly healthy choices</div>
+        </div>
+        <div class="toggle-dot"></div>
+      </div>
 
-// ============================================================
-//  ACTIONS
-// ============================================================
-function toggleRealistic() {
-  _realisticMode = !_realisticMode;
-  renderDash();
-}
-function selectAte(opt) { _tempAte = opt; renderDash(); }
-function selectDrink(val) { _tempDrink = val; renderDash(); }
-function unlockEntry() {
-  const tk = todayKey();
-  const e = _data.days[tk] || {};
-  _tempSteps = e.steps || '';
-  _tempWeight = e.weight || '';
-  _tempAte = e.ate || '';
-  _tempDrink = e.drinkDay !== undefined ? e.drinkDay : null;
-  _data.days[tk] = { ...e, logged: false };
-  save();
-  renderDash();
-}
-function logToday() {
-  const steps = parseInt(document.getElementById('inp-steps')?.value || _tempSteps) || 0;
-  const weight = parseFloat(document.getElementById('inp-weight')?.value || _tempWeight) || null;
-  const tk = todayKey();
-  const wk = weekKey();
+      <div class="toggle-row" id="toggle-drank" onclick="toggleItem('drank')">
+        <div>
+          <div class="toggle-label">Had a Drink</div>
+          <div class="toggle-sub">Tracking ≤2 days/week</div>
+        </div>
+        <div class="toggle-dot"></div>
+      </div>
 
-  const prevEntry = _data.days[tk] || {};
-  const wasDrinkDay = prevEntry.drinkDay === true;
-  const isDrinkDay = _tempDrink === true;
+      <div class="toggle-row" id="toggle-realistic" onclick="toggleItem('realistic')">
+        <div>
+          <div class="toggle-label">Realistic Mode</div>
+          <div class="toggle-sub">Celebrate small wins today</div>
+        </div>
+        <div class="toggle-dot"></div>
+      </div>
 
-  // Adjust weekly alcohol if toggling
-  let weekCount = _data.weeklyAlcohol[wk] || 0;
-  if (wasDrinkDay && !isDrinkDay) weekCount = Math.max(0, weekCount - 1);
-  if (!wasDrinkDay && isDrinkDay) weekCount = weekCount + 1;
+      <button class="btn-primary" onclick="handleCheckin()" style="margin-top:8px">Save Check-In</button>
+    </div>
 
-  _data.days[tk] = { steps, weight, drinkDay: isDrinkDay, ate: _tempAte, logged: true };
-  _data.weeklyAlcohol[wk] = weekCount;
-  if (weight) _data.currentWeight = weight;
+    <!-- Streaks -->
+    <div class="card">
+      <div class="card-title">STREAKS</div>
+      <div class="streak-row">
+        <div>
+          <div class="streak-name">Step Streak</div>
+          <div class="streak-sub">10,000 steps/day</div>
+        </div>
+        <div class="streak-count" id="streak-steps">0</div>
+      </div>
+      <div class="streak-row">
+        <div>
+          <div class="streak-name">Alcohol-Free Days</div>
+          <div class="streak-sub">This week</div>
+        </div>
+        <div class="streak-count" id="streak-alcohol">0</div>
+      </div>
+      <div class="streak-row">
+        <div>
+          <div class="streak-name">Eating Well</div>
+          <div class="streak-sub">Consecutive days</div>
+        </div>
+        <div class="streak-count" id="streak-eating">0</div>
+      </div>
+    </div>
 
-  _tempSteps = ''; _tempWeight = ''; _tempAte = ''; _tempDrink = null;
-  save();
+    <!-- Weekly Summary -->
+    <div class="card">
+      <div class="card-title">THIS WEEK</div>
+      <div class="week-grid" id="week-grid"></div>
+      <div style="display:flex;gap:16px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--green);opacity:0.7"></div> Ate well
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--red);opacity:0.7"></div> Had a drink
+        </div>
+      </div>
+    </div>
 
-  if (steps >= 10000) {
-    const cel = document.getElementById('celebration');
-    cel.classList.add('show');
-    setTimeout(() => cel.classList.remove('show'), 2600);
-  }
-  renderDash();
-}
-function updateSetup(field, val) {
-  _data[field] = val;
-  save();
-}
+  </div>
+</div>
 
-// ============================================================
-//  INIT
-// ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  const u = currentUser();
-  if (u) {
-    enterDashboard();
-  }
-  // Enter key on login
-  document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-  document.getElementById('login-user').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-});
-</script>
+<!-- Celebration Overlay -->
+<div class="celebration-overlay" id="celebration">
+  <div class="celebration-emoji">🔥</div>
+  <div class="celebration-text">10,000 STEPS!</div>
+  <div class="celebration-sub">You crushed it today</div>
+  <button class="btn-secondary" onclick="closeCelebration()">Let's go →</button>
+</div>
+
+<script src="js/app.js"></script>
 </body>
 </html>
