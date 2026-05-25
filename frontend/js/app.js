@@ -1,5 +1,5 @@
 // ---- CONFIG ----
-const API = 'http://localhost:8000';
+const API = '/api';
 
 // ---- STATE ----
 let state = {
