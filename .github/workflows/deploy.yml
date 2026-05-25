@@ -1,0 +1,66 @@
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: level-up-life-497402
+  REGION: us-east1
+  REGISTRY: us-east1-docker.pkg.dev
+  REPOSITORY: leveluplife
+  CLUSTER: leveluplife-cluster
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/998187952261/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@level-up-life-497402.iam.gserviceaccount.com
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-east1-docker.pkg.dev --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ env.REGION }}
+
+      - name: Deploy to GKE
+        run: |
+          kubectl set image deployment/backend \
+            backend=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/backend:${{ github.sha }}
+          kubectl set image deployment/frontend \
+            frontend=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/frontend:${{ github.sha }}
+          kubectl rollout status deployment/backend
+          kubectl rollout status deployment/frontend
