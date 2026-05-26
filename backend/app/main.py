@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import users, logs
@@ -19,6 +20,7 @@ app.include_router(users.router)
 app.include_router(logs.router)
 
 setup_telemetry(app, engine)
+logger = logging.getLogger(__name__)
 
 @app.get("/")
 def root():
@@ -26,4 +28,5 @@ def root():
 
 @app.get("/health")
 def health_check():
+    logger.info("Health check called")
     return {"status": "healthy"}
