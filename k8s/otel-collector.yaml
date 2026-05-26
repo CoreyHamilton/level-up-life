@@ -53,6 +53,9 @@ data:
           password: "${GRAFANA_API_TOKEN}"
 
     service:
+      telemetry:
+        logs:
+          level: debug
       extensions: [basicauth/prometheus, basicauth/loki, basicauth/tempo]
       pipelines:
         traces:
