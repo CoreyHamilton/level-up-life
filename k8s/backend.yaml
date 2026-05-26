@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: us-east1-docker.pkg.dev/level-up-life-497402/leveluplife/backend:v1
+          image: us-east1-docker.pkg.dev/level-up-life-497402/leveluplife/backend:03ff6acbbffba415d331651166e206719008775854937235ef3ae5b0c5e8282e
           ports:
             - containerPort: 8000
           env:
