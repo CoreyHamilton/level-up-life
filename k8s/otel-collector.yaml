@@ -1,0 +1,160 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+        timeout: 5s
+        send_batch_size: 1000
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 256
+
+    exporters:
+      prometheusremotewrite:
+        endpoint: "${PROMETHEUS_URL}"
+        auth:
+          authenticator: basicauth/prometheus
+
+      loki:
+        endpoint: "${LOKI_URL}"
+        auth:
+          authenticator: basicauth/loki
+
+      otlp/tempo:
+        endpoint: "${TEMPO_URL}"
+        tls:
+          insecure: false
+        auth:
+          authenticator: basicauth/tempo
+
+    extensions:
+      basicauth/prometheus:
+        client_auth:
+          username: "${PROMETHEUS_USERNAME}"
+          password: "${GRAFANA_API_TOKEN}"
+      basicauth/loki:
+        client_auth:
+          username: "${LOKI_USERNAME}"
+          password: "${GRAFANA_API_TOKEN}"
+      basicauth/tempo:
+        client_auth:
+          username: "${TEMPO_USERNAME}"
+          password: "${GRAFANA_API_TOKEN}"
+
+    service:
+      extensions: [basicauth/prometheus, basicauth/loki, basicauth/tempo]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/tempo]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheusremotewrite]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [loki]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  labels:
+    app: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.100.0
+          args: ["--config=/etc/otel/config.yaml"]
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          env:
+            - name: PROMETHEUS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: prometheus-url
+            - name: PROMETHEUS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: prometheus-username
+            - name: LOKI_URL
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: loki-url
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: loki-username
+            - name: TEMPO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: tempo-url
+            - name: TEMPO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: tempo-username
+            - name: GRAFANA_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud-credentials
+                  key: grafana-api-token
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: grpc
+      port: 4317
+      targetPort: 4317
+    - name: http
+      port: 4318
+      targetPort: 4318
