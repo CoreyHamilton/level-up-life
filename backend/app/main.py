@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import users, logs
-from .database import engine
-from .telemetry import setup_telemetry
 
 app = FastAPI(title="Level Up Life API", version="0.1.0")
 
@@ -17,8 +15,6 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(logs.router)
-
-setup_telemetry(app, engine)
 
 @app.get("/")
 def root():
