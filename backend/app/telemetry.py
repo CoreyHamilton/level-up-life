@@ -65,6 +65,14 @@ def setup_telemetry(app, engine):
     logging.getLogger("leveluplife").addHandler(handler)
     logging.getLogger("leveluplife").setLevel(logging.INFO)
 
+    # Also log to stdout for kubectl logs visibility
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    stream_handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+    ))
+    logging.getLogger("leveluplife").addHandler(stream_handler)
+
     # Auto-instrument FastAPI and SQLAlchemy
     FastAPIInstrumentor.instrument_app(app)
     SQLAlchemyInstrumentor().instrument(engine=engine)
