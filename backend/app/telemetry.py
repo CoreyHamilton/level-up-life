@@ -57,7 +57,13 @@ def setup_telemetry(app, engine):
 
     # Attach OTel to Python's logging system
     handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+    
+    # Add to root logger (catches library logs)
     logging.getLogger().addHandler(handler)
+    
+    # Add explicitly to our app logger (survives uvicorn's log reconfiguration)
+    logging.getLogger("leveluplife").addHandler(handler)
+    logging.getLogger("leveluplife").setLevel(logging.INFO)
 
     # Auto-instrument FastAPI and SQLAlchemy
     FastAPIInstrumentor.instrument_app(app)

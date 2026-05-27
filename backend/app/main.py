@@ -5,6 +5,9 @@ from .routers import users, logs
 from .database import engine
 from .telemetry import setup_telemetry
 
+logger = logging.getLogger("leveluplife")
+logger.setLevel(logging.INFO)
+
 app = FastAPI(title="Level Up Life API", version="0.1.0")
 
 # Allow the frontend to talk to the backend
@@ -20,10 +23,10 @@ app.include_router(users.router)
 app.include_router(logs.router)
 
 setup_telemetry(app, engine)
-logger = logging.getLogger(__name__)
 
 @app.get("/")
 def root():
+    logger.info("Root endpoint called")
     return {"message": "Level Up Life API is running"}
 
 @app.get("/health")
